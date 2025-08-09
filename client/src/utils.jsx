@@ -1,2 +1,2 @@
 
-export const API_URL = "http://localhost:8000/whats"; // Ensure /whats prefix is correct
+export const API_URL = process.env.API_URL; // Ensure /whats prefix is correct
