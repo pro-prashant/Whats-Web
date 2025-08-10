@@ -1,14 +1,13 @@
-// src/socket.js
 import { io } from "socket.io-client";
 
-// Use Vite env variables for cleaner config
-const API_URL =
+// Choose socket URL from env variables
+const SOCKET_URL =
   import.meta.env.MODE === "development"
-    ? "http://localhost:8000" // Local backend
-    : import.meta.env.VITE_SOCKET_URL; // From Vercel env
+    ? import.meta.env.VITE_SOCKET_URL
+    : import.meta.env.VITE_SOCKET_URL; // Will be replaced by production URL in Vercel
 
-export const socket = io(API_URL, {
-  transports: ["websocket", "polling"], // fallback
+export const socket = io(SOCKET_URL, {
+  transports: ["websocket", "polling"], // fallback to polling
   reconnection: true,
   reconnectionAttempts: 5,
 });
