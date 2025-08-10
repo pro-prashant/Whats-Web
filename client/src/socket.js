@@ -1,13 +1,14 @@
 // src/socket.js
 import { io } from "socket.io-client";
 
+// Use Vite env variables for cleaner config
 const API_URL =
   import.meta.env.MODE === "development"
     ? "http://localhost:8000" // Local backend
-    : "https://your-deployed-backend-url.com"; // Production backend
+    : import.meta.env.VITE_SOCKET_URL; // From Vercel env
 
 export const socket = io(API_URL, {
-  transports: ["websocket", "polling"], // fallback to polling if websocket fails
+  transports: ["websocket", "polling"], // fallback
   reconnection: true,
   reconnectionAttempts: 5,
 });
@@ -17,5 +18,5 @@ socket.on("connect", () => {
 });
 
 socket.on("connect_error", (err) => {
-  console.error("❌ Socket connection error:", err);
+  console.error("❌ Socket connection error:", err.message);
 });
