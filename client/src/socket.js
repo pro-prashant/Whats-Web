@@ -1,11 +1,13 @@
-
 // src/socket.js
 import { io } from "socket.io-client";
 
-const API_URL = "http://localhost:8000"; // Your backend base URL
+const API_URL =
+  import.meta.env.MODE === "development"
+    ? "http://localhost:8000" // Local backend
+    : "https://your-deployed-backend-url.com"; // Production backend
 
 export const socket = io(API_URL, {
-  transports: ["websocket"],
+  transports: ["websocket", "polling"], // fallback to polling if websocket fails
   reconnection: true,
   reconnectionAttempts: 5,
 });
