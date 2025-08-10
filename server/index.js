@@ -11,27 +11,29 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-// ✅ Common allowed origins
+// Read allowed origins from env
 const allowedOrigins = [
-  "http://localhost:5173",
-  "https://whats-web-lake.vercel.app"
-];
+  process.env.FRONT_URL_LOCAL,
+  process.env.FRONT_URL_PROD,
+].filter(Boolean);
 
-// ✅ Socket.IO with proper CORS
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST"],
-    credentials: true
-  }
-});
+console.log("Allowed CORS origins:", allowedOrigins);
 
-// ✅ Express CORS with same origins
+// CORS middleware with dynamic origin check
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like Postman, curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        console.warn(`Blocked CORS request from origin: ${origin}`);
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST"],
-    credentials: true
+    credentials: true,
   })
 );
 
@@ -40,10 +42,18 @@ app.use(express.json());
 const PORT = process.env.PORT || 8000;
 ConnectionDb();
 
-// Attach socket.io to app (optional)
+// Socket.IO with CORS configured
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
 app.set("io", io);
 
-// ✅ Debug connection
+// Socket connection debugging
 io.on("connection", (socket) => {
   console.log("🔌 Socket connected:", socket.id);
   socket.on("disconnect", () => {
